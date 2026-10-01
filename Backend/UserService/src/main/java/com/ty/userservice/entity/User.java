@@ -20,25 +20,25 @@ import java.sql.Timestamp;
 @Getter
 @Setter
 public class User {
-
     @Id
-    Integer userid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer userid;
 
-    String username;
-    String email;
+   private String username;
+    private String email;
 
     @Column(name = "phone", nullable = false, unique = true)
-    String phone;
+    private String phone;
 
-    String password;
-    String role;
-    String status;
+    private String password;
+    private String role="USER";
+    private String status="Active";
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    Timestamp created_at;
+    private Timestamp created_at;
 
     @Column(name = "updated_at")
-    Timestamp updated_at;
+    private Timestamp updated_at;
 
     @PrePersist
     protected void onCreate() {
