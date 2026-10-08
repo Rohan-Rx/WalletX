@@ -1,24 +1,63 @@
 package com.ty.walletservice.implementation;
 
 import com.ty.walletservice.entity.Wallet;
+import com.ty.walletservice.exception.InsufficientBalanceException;
+import com.ty.walletservice.exception.InvalidAmountException;
+import com.ty.walletservice.exception.WalletNotFoundException;
 import com.ty.walletservice.repository.WalletRepo;
+import com.ty.walletservice.service.WalletNumberGenerator;
 import com.ty.walletservice.service.WalletService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class WalletImpl implements WalletService {
     @Autowired
     private WalletRepo repo;
-    
-    @Override
-    public Wallet create(Wallet wallet) {
-        return repo.save(wallet);
-    }
+    @Autowired
+    private WalletNumberGenerator walletNumberGenerator;
+
+        @Override
+        @Transactional
+        public Wallet create(Wallet wallet) {
+
+            if (wallet == null) {
+                throw new IllegalArgumentException("Wallet cannot be null");
+            }
+
+            if (wallet.getUserid() == null) {
+                throw new IllegalArgumentException("UserID cannot be null");
+            }
+
+            if (repo.existsByUserid(wallet.getUserid())) {
+                throw new IllegalArgumentException(
+                        "User already has a wallet"
+                );
+            }
+
+            wallet.setBalance(BigDecimal.ZERO);
+
+            if (wallet.getCurrency() == null) {
+                wallet.setCurrency("INR");
+            }
+
+            if (wallet.getStatus() == null) {
+                wallet.setStatus("ACTIVE");
+            }
+
+            String walletNumber =
+                    walletNumberGenerator.generateWalletNumber();
+
+            wallet.setWalletId(walletNumber);
+
+            return repo.save(wallet);
+        }
 
     @Override
     public List<Wallet> getAll() {
@@ -27,66 +66,84 @@ public class WalletImpl implements WalletService {
 
     @Override
     public Wallet getWalletById(Integer id) {
-        return repo.findById(id).get();
+
+        return repo.findById(id).orElseThrow(()->
+                new WalletNotFoundException("Wallet Not Found"+id));
     }
 
     @Override
     public Wallet getWalletByWalletId(String walletId) {
-        return repo.findByWalletNumber(walletId).get();
+
+        return repo.findByWalletId(walletId).get();
     }
 
     @Override
     public Wallet delete(Integer id) {
 
-        Optional<Wallet> wallet = repo.findById(id);
+        Wallet wallet = repo.findById(id).orElseThrow(()->
+                new WalletNotFoundException("Wallet Not Found"+id));
 
-        if (wallet.isPresent()) {
-            Wallet w = wallet.get();
-            repo.delete(w);
-            return w;
-        }
+        repo.delete(wallet);
 
-        return null;
+        return wallet;
     }
 
     @Override
-    public Wallet credit(String walletId, BigDecimal ammount) {
-        Optional<Wallet> wallet = repo.findByWalletId(walletId);
-        if(wallet.isPresent()){
-            Wallet w=wallet.get();
-            w.setBalance(w.getBalance().add(ammount));
-            repo.save(w);
+    public Wallet credit(String walletId, BigDecimal amount) {
+        Wallet wallet = repo.findByWalletId(walletId).orElseThrow(()->
+                new WalletNotFoundException("Wallet Not Found"+walletId));
+        if(amount==null || amount.compareTo(BigDecimal.ZERO) <= 0){
+            throw new InvalidAmountException("Amount must be greater than zero");
         }
-        return null;
+        wallet.setBalance(wallet.getBalance().add(amount));
+        return repo.save(wallet);
     }
 
     @Override
-    public Wallet debit(String walletId, BigDecimal ammount) {
-        Optional<Wallet> wallet=repo.findByWalletId(walletId);
-        if(wallet.isPresent()){
-            Wallet w=wallet.get();
-            if(ammount.compareTo(w.getBalance()) <= 0) {
-                w.setBalance(w.getBalance().subtract(ammount));
-                repo.save(w);
-            }
+    public Wallet debit(String walletId, BigDecimal amount) {
+        Wallet wallet=repo.findByWalletId(walletId).orElseThrow(()->
+                new WalletNotFoundException("Wallet Not Found"+walletId));
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidAmountException("Amount must be greater than zero");
         }
-        return null;
+
+        if (amount.compareTo(wallet.getBalance()) > 0) {
+            throw new InsufficientBalanceException("Insufficient wallet balance");
+        }
+
+        wallet.setBalance(wallet.getBalance().subtract(amount));
+
+        return repo.save(wallet);
     }
 
     @Override
     public BigDecimal getBalance(String walletId) {
-        Optional<Wallet> wallet = repo.findByWalletId(walletId);
+        Wallet wallet = repo.findByWalletId(walletId).orElseThrow(()->
+                new WalletNotFoundException("Wallet Not Found"+walletId));
 
-        if (wallet.isPresent()) {
-            Wallet w = wallet.get();
-            return w.getBalance();
-        }
-
-        return null;
+        return wallet.getBalance();
     }
 
     @Override
-    public Wallet Transfer(String senderWalletId, String ReceiverWalletId, BigDecimal ammount) {
-        return null;
+    @Transactional
+    public Wallet Transfer(String senderWalletId, String ReceiverWalletId, BigDecimal amount) {
+        if(amount==null || amount.compareTo(BigDecimal.ZERO) <= 0){
+            throw new InvalidAmountException("Amount Must be Greater Than Zero");
+        }
+        if(senderWalletId.equals(ReceiverWalletId)){
+            throw new IllegalArgumentException("Sender and Receiver Wallet must be different");
+        }
+        Wallet sender = repo.findByWalletId(senderWalletId).orElseThrow(()->
+                new WalletNotFoundException("Sender Wallet Not found "+senderWalletId));
+        Wallet receiver = repo.findByWalletId(ReceiverWalletId).orElseThrow(()->
+                new WalletNotFoundException("Receiver Wallet not found "+ReceiverWalletId));
+        if(amount.compareTo(sender.getBalance()) > 0){
+            throw new InsufficientBalanceException("Insufficient Wallet Balance" );
+        }
+        sender.setBalance(sender.getBalance().subtract(amount));
+        receiver.setBalance(receiver.getBalance().add(amount));
+        repo.save(sender);
+        repo.save(receiver);
+        return sender;
     }
 }

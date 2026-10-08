@@ -11,9 +11,9 @@ public interface WalletService {
     Wallet getWalletById(Integer id);
     Wallet getWalletByWalletId(String walletId);
     Wallet delete(Integer id);
-    Wallet credit(String walletId, BigDecimal ammount);
-    Wallet debit(String walletId, BigDecimal ammount);
+    Wallet credit(String walletId, BigDecimal amount);
+    Wallet debit(String walletId, BigDecimal amount);
     BigDecimal getBalance(String walletId);
-    Wallet Transfer(String senderWalletId,String ReceiverWalletId,BigDecimal ammount);
+    Wallet Transfer(String senderWalletId,String ReceiverWalletId,BigDecimal amount);
 
 }

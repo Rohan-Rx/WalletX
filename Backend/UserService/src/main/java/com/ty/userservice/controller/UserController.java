@@ -3,6 +3,7 @@ package com.ty.userservice.controller;
 
 import com.ty.userservice.entity.User;
 import com.ty.userservice.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -19,7 +20,7 @@ public class UserController {
     @Autowired
     private UserService userService;
     @PostMapping("/create")
-    public ResponseEntity<User> create(@RequestBody User user){
+    public ResponseEntity<User> create(@Valid @RequestBody User user){
         User u = userService.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }

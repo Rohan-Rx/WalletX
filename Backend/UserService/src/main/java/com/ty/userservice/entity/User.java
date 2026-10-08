@@ -1,6 +1,10 @@
 package com.ty.userservice.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,12 +28,23 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer userid;
 
+
+    @NotBlank(message = "Username is required")
+    @Size(min = 3, message = "Username must contain at least 3 characters")
    private String username;
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
     private String email;
 
     @Column(name = "phone", nullable = false, unique = true)
+    @NotBlank(message = "Phone number is required")
+    @Pattern(
+            regexp = "^[6-9][0-9]{9}$",
+            message = "Phone number must be a valid 10-digit Indian mobile number"
+    )
     private String phone;
-
+    @NotBlank(message = "Password is required")
+    @Size(min = 8, message = "Password must contain at least 8 characters")
     private String password;
     private String role="USER";
     private String status="Active";

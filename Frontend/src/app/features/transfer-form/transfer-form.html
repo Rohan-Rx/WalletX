@@ -1,0 +1,106 @@
+<div class="send-card">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-icon-wrap">
+      ➤
+    </div>
+    <h2>Send Money <span class="cursive-accent">gently</span></h2>
+    <p>Transfer funds securely to another wallet with zero anxiety</p>
+  </div>
+
+  <!-- FROM WALLET DISPLAY -->
+  <div class="field">
+    <label>From</label>
+
+    <div class="wallet-display">
+      <div class="wallet-info">
+        <div class="wallet-icon">
+          ◈
+        </div>
+        <div>
+          <div class="wallet-id">
+            {{ wallet?.walletId || 'Loading...' }}
+          </div>
+          <span class="wallet-type">
+            Personal Wallet
+          </span>
+        </div>
+      </div>
+
+      <div class="verified">
+        ✓ Verified
+      </div>
+    </div>
+  </div>
+
+  <!-- RECIPIENT WALLET INPUT -->
+  <div class="field">
+    <label for="recipientWallet">Recipient Wallet</label>
+
+    <div class="input-wrapper">
+      <input
+        id="recipientWallet"
+        type="text"
+        [(ngModel)]="receiverWalletId"
+        placeholder="Enter recipient wallet ID"
+        autocomplete="off"
+      >
+      <span class="input-adornment">◈</span>
+    </div>
+  </div>
+
+  <!-- AMOUNT INPUT -->
+  <div class="field">
+    <label for="amount">Amount</label>
+
+    <div class="input-wrapper amount-wrapper">
+      <span class="currency">₹</span>
+      <input
+        id="amount"
+        type="number"
+        [(ngModel)]="transferAmount"
+        placeholder="0.00"
+        min="1"
+      >
+    </div>
+  </div>
+
+  <!-- ERROR ALERT -->
+  @if (transferError) {
+    <div class="transfer-error">
+      <span class="error-dot">•</span>
+      <span>{{ transferError }}</span>
+    </div>
+  }
+
+  <!-- SUCCESS ALERT -->
+  @if (transferSuccess) {
+    <div class="transfer-success">
+      <span class="success-check">✓</span>
+      <span>Money transferred successfully</span>
+    </div>
+  }
+
+  <!-- SEND BUTTON -->
+  <button
+    class="send-btn"
+    type="button"
+    [disabled]="transferLoading"
+    (click)="sendMoney()"
+  >
+    <div class="button-content">
+      <span>
+        {{ transferLoading ? 'Processing...' : 'Send Money' }}
+      </span>
+      <span class="btn-arrow">→</span>
+    </div>
+  </button>
+
+  <!-- SECURITY FOOTER -->
+  <div class="secure">
+    <span>🔒</span>
+    <span>Tranquil, encrypted wallet-to-wallet transfer</span>
+  </div>
+
+</div>

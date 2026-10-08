@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 
+
 @Component({
   selector: 'app-login',
   imports: [ReactiveFormsModule, RouterLink],
@@ -15,28 +16,57 @@ export class Login {
   authService = inject(AuthService);
   router = inject(Router);
 
+  loginError = '';
+  isLoading = false;
+
+  
+
   loginForm = this.fb.group({
     email: [''],
     password: ['']
   });
 
-  login() {
+ login() {
+  this.isLoading = true;
 
-    const email = this.loginForm.value.email ?? '';
-    const password = this.loginForm.value.password ?? '';
+  const email = this.loginForm.value.email ?? '';
+  const password = this.loginForm.value.password ?? '';
 
-    this.authService.login(email, password).subscribe({
-
-      next: (response) => {
-        console.log('Login successful:', response);
-
-        this.router.navigate(['/dashboard']);
-      },
-
-      error: (error) => {
-        console.error('Login failed:', error);
-      }
-
-    });
+  if (!email || !password) {
+    this.isLoading = false;
+    alert('Please enter your email and password.');
+    return;
   }
+
+  this.authService.login(email, password).subscribe({
+
+    next: (response) => {
+      this.isLoading = false;
+
+      alert('Login successful!');
+
+      this.router.navigate(['/dashboard']);
+    },
+
+    error: (error) => {
+      console.error('Login failed:', error);
+
+      this.isLoading = false;
+
+      if (error.status === 401 || error.status === 403) {
+        alert('Invalid email or password.');
+      } 
+      else if (error.status === 404) {
+        alert('Login service not found.');
+      } 
+      else if (error.status === 0) {
+        alert('Unable to connect to the server.');
+      } 
+      else {
+        alert('Login failed. Please try again.');
+      }
+    }
+
+  });
+}
 }

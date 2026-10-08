@@ -1,54 +1,139 @@
-<div class="login-page">
+<!-- Persistent 0.35 Opacity SVG Fractal Noise Grain Overlay -->
+<div class="grain-overlay" aria-hidden="true"></div>
 
-  <div class="login-card">
+<!-- Ambient Warm Floating Blobs (#FFE4E1 & #E6E6FA) -->
+<div class="blob-wrapper" aria-hidden="true">
+  <div class="blob blob-peach"></div>
+  <div class="blob blob-lavender"></div>
+  <div class="blob blob-sage"></div>
+</div>
 
-    <div class="brand">
-      <h1>PayFlow</h1>
-      <p>Digital Wallet</p>
+<!-- Floating Pill-Shaped Navigation Bar (70% white opacity, 20px blur) -->
+<header class="nav-container">
+  <nav class="nav-pill">
+    <a href="#" class="nav-brand">
+      <div class="brand-logo-circle">
+        <div class="brand-logo-dot"></div>
+      </div>
+      <span class="brand-title">WalletX</span>
+    </a>
+
+    <div class="nav-links">
+      <a href="#features">Calm Features</a>
+      <a href="#security">Quiet Security</a>
+      <a routerLink="/about">About</a>
     </div>
 
-    <div class="heading">
-      <h2>Welcome Back</h2>
-      <p>Login to access your wallet.</p>
+    <a routerLink="/register" class="nav-cta">Create account</a>
+  </nav>
+</header>
+
+<!-- Main Stage (Single-Column Mobile First, 2-Card Living Room Desktop) -->
+<main class="login-stage">
+  <div class="content-layout">
+
+    <!-- Tactile WalletX Login Card -->
+    <div class="login-card">
+
+      <div class="card-header">
+        <div class="card-badge">
+          <span class="card-badge-dot"></span>
+          WalletX • Digital Wallet
+        </div>
+        <h1 class="card-title">
+          Welcome back to your <span class="cursive-accent">calm</span> wallet.
+        </h1>
+        <p class="card-subtitle">
+          Enter your credentials quietly to view your balances and transactions.
+        </p>
+      </div>
+
+      <!-- Angular Reactive Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="login()" novalidate>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            class="input-pill"
+            formControlName="email"
+            placeholder="Enter your email"
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            class="input-pill"
+            formControlName="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+          >
+        </div>
+
+        <!-- Soft Error Message Alert -->
+        @if (loginError) {
+          <div class="login-error">
+            <span class="error-dot">•</span>
+            <span>{{ loginError }}</span>
+          </div>
+        }
+
+        <div class="forgot-password">
+          <a href="#">Forgot password?</a>
+        </div>
+
+        <!-- Primary Coral Pill Button -->
+        <button
+          type="submit"
+          class="login-btn"
+          [disabled]="isLoading">
+          {{ isLoading ? 'Entering quietly...' : 'Login' }}
+        </button>
+
+      </form>
+
+      <!-- Soft Registration Switch -->
+      <div class="register-link">
+        <span>Don't have an account?</span>
+        <a routerLink="/register">Create Account</a>
+      </div>
+
     </div>
 
-    <form [formGroup]="loginForm" (ngSubmit)="login()">
+    <!-- Companion Physical Diary Note Card (Rotated 1.2 degrees) -->
+    <aside class="diary-column">
 
-      <div class="form-group">
-        <label>Email</label>
-
-        <input
-          type="email"
-          formControlName="email"
-          placeholder="Enter your email"
-        >
+      <div class="diary-card">
+        <div class="diary-timestamp">
+          <span class="diary-timestamp-dot"></span>
+          Real member reflection
+        </div>
+        <p class="diary-quote">
+          “No spam popups, no red panic notifications. Just a gentle, quiet overview of what I've saved and spent each week.”
+        </p>
+        <div class="diary-signature">
+          <div class="signature-line"></div>
+          <span class="signature-text">sophie from oslo</span>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label>Password</label>
-
-        <input
-          type="password"
-          formControlName="password"
-          placeholder="Enter your password"
-        >
+      <!-- Tranquil Encryption Micro-Card -->
+      <div class="pause-card">
+        <div class="pause-orb">
+          <span class="pause-orb-icon">☁</span>
+        </div>
+        <div class="pause-text">
+          <h4>Encrypted & tranquil</h4>
+          <p>Your session is protected with quiet end-to-end security.</p>
+        </div>
       </div>
 
-      <div class="forgot-password">
-        <a href="#">Forgot password?</a>
-      </div>
-
-      <button type="submit" class="login-btn">
-        Login
-      </button>
-
-    </form>
-
-    <div class="register-link">
-      <span>Don't have an account?</span>
-      <a routerLink="/register">Create Account</a>
-    </div>
+    </aside>
 
   </div>
-
-</div>
+</main>

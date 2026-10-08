@@ -1,6 +1,7 @@
 package com.ty.userservice.implementation;
 
 import com.ty.userservice.entity.User;
+import com.ty.userservice.exception.DuplicateException;
 import com.ty.userservice.repository.UserRepo;
 import com.ty.userservice.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,9 @@ public class UserImpl implements UserService {
         if (repo.existsByPhone(user.getPhone())) {
             throw new RuntimeException("Phone number already registered");
         }
-
+        if(repo.existsByEmail(user.getEmail())){
+            throw new DuplicateException("Email is already Registered");
+        }
         return repo.save(user);
     }
 

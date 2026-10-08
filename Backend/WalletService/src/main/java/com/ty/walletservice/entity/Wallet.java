@@ -5,9 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.apache.catalina.User;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
@@ -29,9 +26,9 @@ public class Wallet {
     private String walletId;
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal balance = BigDecimal.ZERO;
-    @Column(nullable = false)
+
     private String currency="INR";
-    @Column(nullable = false)
+
     private String status="Active";
     @Column(name = "created_at" ,nullable = false,updatable = false)
     Timestamp created_at;

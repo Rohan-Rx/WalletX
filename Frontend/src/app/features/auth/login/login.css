@@ -1,134 +1,568 @@
-.login-page {
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Reenie+Beanie&display=swap');
+
+/* ==========================================================================
+   CSS CUSTOM PROPERTIES (SOFTLY PALETTE FOR WALLETX)
+   ========================================================================== */
+:host {
+  --bg-cream: #FDFCF8;
+  --sage: #E8EFE8;
+  --lavender: #EFEDF4;
+  --coral: #FFB7B2;
+  --coral-hover: #FFA29B;
+  --dark-stone: #292524;
+  --muted-stone: #78716C;
+  --border-stone: #E7E5E4;
+  --white: #FFFFFF;
+  --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0 10px 30px -4px rgba(255, 183, 178, 0.35);
+
+  display: block;
+  background-color: var(--bg-cream);
+  color: var(--dark-stone);
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   0.35 OPACITY FRACTAL NOISE GRAIN OVERLAY
+   ========================================================================== */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.35;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* ==========================================================================
+   FLOATING PASTEL BACKGROUND BLOBS (#FFE4E1 & #E6E6FA)
+   ========================================================================== */
+.blob-wrapper {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.60;
+  animation: floatBlobs 6s ease-in-out infinite alternate;
+}
+
+.blob-peach {
+  width: 440px;
+  height: 440px;
+  background: #FFE4E1;
+  top: -100px;
+  left: 15%;
+  animation-delay: 0s;
+}
+
+.blob-lavender {
+  width: 500px;
+  height: 500px;
+  background: #E6E6FA;
+  bottom: -120px;
+  right: 10%;
+  animation-delay: -3s;
+}
+
+.blob-sage {
+  width: 320px;
+  height: 320px;
+  background: #E8EFE8;
+  top: 40%;
+  left: -80px;
+  animation-delay: -1.5s;
+}
+
+@keyframes floatBlobs {
+  0%   { transform: translateY(-10px) scale(1); }
+  100% { transform: translateY(10px) scale(1.04); }
+}
+
+/* ==========================================================================
+   FLOATING PILL NAVIGATION BAR
+   ========================================================================== */
+.nav-container {
+  position: fixed;
+  top: 16px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 40;
+  padding: 0 16px;
+}
+
+.nav-pill {
+  width: 100%;
+  max-width: 920px;
+  background: rgba(255, 255, 255, 0.70);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: var(--shadow-soft);
+  border-radius: 9999px;
+  padding: 10px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--dark-stone);
+}
+
+.brand-logo-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--coral);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-logo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--white);
+}
+
+.brand-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-links a {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted-stone);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: var(--dark-stone);
+}
+
+.nav-cta {
+  background: var(--dark-stone);
+  color: var(--white);
+  padding: 8px 18px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.nav-cta:hover {
+  opacity: 0.9;
+  transform: scale(0.98);
+}
+
+/* ==========================================================================
+   MAIN STAGE
+   ========================================================================== */
+.login-stage {
+  position: relative;
+  z-index: 10;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #f4f7fb;
-  padding: 20px;
+  padding: 96px 20px 48px;
+  box-sizing: border-box;
 }
 
-.login-card {
+.content-layout {
   width: 100%;
-  max-width: 430px;
-  background: white;
-  padding: 40px;
-  border-radius: 16px;
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+  max-width: 960px;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 36px;
+  align-items: center;
 }
 
-.brand {
-  text-align: center;
-  margin-bottom: 30px;
+/* ==========================================================================
+   TACTILE WALLETX LOGIN CARD
+   ========================================================================== */
+.login-card {
+  background: var(--white);
+  border-radius: 2.5rem; /* 40px */
+  padding: 44px 38px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(231, 229, 228, 0.6);
+  position: relative;
+  animation: revealOnScroll 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.brand h1 {
+@keyframes revealOnScroll {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-header {
+  margin-bottom: 28px;
+}
+
+.card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--sage);
+  color: #3f6212;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  margin-bottom: 14px;
+}
+
+.card-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4d7c0f;
+}
+
+.card-title {
   margin: 0;
-  font-size: 32px;
-  font-weight: 700;
-  color: #2563eb;
+  font-size: 2.45rem;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: var(--dark-stone);
 }
 
-.brand p {
-  margin-top: 5px;
-  color: #6b7280;
-  font-size: 14px;
+.cursive-accent {
+  font-family: 'Reenie Beanie', cursive;
+  font-size: 3.2rem;
+  font-weight: 400;
+  color: #D97706;
+  line-height: 0.8;
+  display: inline-block;
+  margin: 0 4px;
+  transform: rotate(-2deg);
 }
 
-.heading {
-  margin-bottom: 25px;
-}
-
-.heading h2 {
-  margin: 0;
-  font-size: 24px;
-  color: #111827;
-}
-
-.heading p {
+.card-subtitle {
   margin-top: 8px;
-  color: #6b7280;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--muted-stone);
+  line-height: 1.5;
 }
 
+/* ==========================================================================
+   PILL FORM INPUTS
+   ========================================================================== */
 .form-group {
   margin-bottom: 18px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 7px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #374151;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dark-stone);
+  letter-spacing: -0.01em;
 }
 
-.form-group input {
+.input-pill {
   width: 100%;
   box-sizing: border-box;
-  padding: 12px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
+  background: #FBFBFA;
+  border: 1px solid var(--border-stone);
+  border-radius: 9999px;
+  padding: 13px 20px;
+  font-family: inherit;
   font-size: 14px;
+  color: var(--dark-stone);
   outline: none;
-  transition: 0.2s;
+  transition: all 0.3s ease;
 }
 
-.form-group input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+.input-pill::placeholder {
+  color: #A8A29E;
 }
 
-.form-group input::placeholder {
-  color: #9ca3af;
+.input-pill:focus {
+  background: var(--white);
+  border-color: var(--coral);
+  box-shadow: 0 0 0 4px rgba(255, 183, 178, 0.25);
+}
+
+/* Soft Error Alert */
+.login-error {
+  background: #FFF1F2;
+  border: 1px solid #FFE4E6;
+  color: #BE123C;
+  padding: 10px 16px;
+  border-radius: 9999px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.error-dot {
+  font-size: 16px;
+  color: #E11D48;
 }
 
 .forgot-password {
   text-align: right;
-  margin-top: -5px;
-  margin-bottom: 20px;
+  margin-top: -6px;
+  margin-bottom: 22px;
 }
 
 .forgot-password a {
-  color: #2563eb;
   font-size: 13px;
+  color: var(--muted-stone);
   text-decoration: none;
+  transition: color 0.2s ease;
 }
 
 .forgot-password a:hover {
+  color: var(--dark-stone);
   text-decoration: underline;
 }
 
+/* Primary Coral Pill Button */
 .login-btn {
   width: 100%;
-  padding: 13px;
+  padding: 15px;
   border: none;
-  border-radius: 8px;
-  background: #2563eb;
-  color: white;
+  border-radius: 9999px;
+  background: var(--coral);
+  color: var(--dark-stone);
+  font-family: inherit;
   font-size: 15px;
   font-weight: 600;
+  letter-spacing: -0.01em;
   cursor: pointer;
-  transition: 0.2s;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.login-btn:hover {
-  background: #1d4ed8;
+.login-btn:hover:not(:disabled) {
+  background: var(--coral-hover);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+.login-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .register-link {
   text-align: center;
-  margin-top: 25px;
-  font-size: 14px;
-  color: #6b7280;
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--muted-stone);
 }
 
 .register-link a {
-  margin-left: 5px;
-  color: #2563eb;
-  text-decoration: none;
+  margin-left: 4px;
+  color: var(--dark-stone);
   font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--coral);
+  text-underline-offset: 4px;
+  transition: opacity 0.2s ease;
 }
 
 .register-link a:hover {
-  text-decoration: underline;
+  opacity: 0.8;
+}
+
+/* ==========================================================================
+   DIARY TESTIMONIAL COMPANION CARD
+   ========================================================================== */
+.diary-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.diary-card {
+  background: var(--white);
+  border-radius: 2rem;
+  padding: 32px 28px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid rgba(231, 229, 228, 0.6);
+  transform: rotate(1.2deg);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.diary-card:hover {
+  transform: rotate(0deg) translateY(-4px);
+  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.08);
+}
+
+.diary-timestamp {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted-stone);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.diary-timestamp-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--coral);
+}
+
+.diary-quote {
+  margin: 0 0 24px;
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--dark-stone);
+  line-height: 1.55;
+}
+
+.diary-signature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.signature-line {
+  width: 32px;
+  height: 1px;
+  background: var(--border-stone);
+}
+
+.signature-text {
+  font-family: 'Reenie Beanie', cursive;
+  font-size: 26px;
+  color: var(--muted-stone);
+  line-height: 1;
+}
+
+/* Mindful Pause Micro-Card */
+.pause-card {
+  background: var(--lavender);
+  border-radius: 1.75rem;
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transform: rotate(-0.8deg);
+  box-shadow: var(--shadow-soft);
+}
+
+.pause-orb {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--coral);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: breathePulse 4s ease-in-out infinite;
+}
+
+@keyframes breathePulse {
+  0%, 100% {
+    transform: scale(0.92);
+    box-shadow: 0 0 0 0 rgba(255, 183, 178, 0.5);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 12px rgba(255, 183, 178, 0);
+  }
+}
+
+.pause-orb-icon {
+  color: white;
+  font-size: 14px;
+}
+
+.pause-text h4 {
+  margin: 0 0 2px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark-stone);
+}
+
+.pause-text p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted-stone);
+}
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS
+   ========================================================================== */
+@media (max-width: 860px) {
+  .content-layout {
+    grid-template-columns: 1fr;
+    max-width: 460px;
+    gap: 28px;
+  }
+
+  .diary-column {
+    order: 2;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .login-card {
+    padding: 34px 24px;
+    border-radius: 2rem;
+  }
+
+  .card-title {
+    font-size: 2rem;
+  }
+
+  .cursive-accent {
+    font-size: 2.6rem;
+  }
 }

@@ -1,0 +1,476 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Reenie+Beanie&display=swap');
+
+/* ==========================================================================
+   CSS CUSTOM PROPERTIES (SOFTLY PALETTE FOR WALLETX ABOUT SECTION)
+   ========================================================================== */
+:host {
+  --bg-cream: #FDFCF8;
+  --sage: #E8EFE8;
+  --sage-dark: #3F6212;
+  --lavender: #EFEDF4;
+  --coral: #FFB7B2;
+  --coral-hover: #FFA29B;
+  --dark-stone: #292524;
+  --muted-stone: #78716C;
+  --border-stone: #E7E5E4;
+  --white: #FFFFFF;
+  --shadow-soft: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 16px 40px -8px rgba(0, 0, 0, 0.04);
+  --shadow-hover: 0 12px 30px -4px rgba(255, 183, 178, 0.35);
+
+  display: block;
+  background-color: var(--bg-cream);
+  color: var(--dark-stone);
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   0.35 OPACITY FRACTAL NOISE GRAIN OVERLAY
+   ========================================================================== */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.35;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* ==========================================================================
+   WARM FLOATING BACKGROUND BLOBS (#FFE4E1 & #E6E6FA)
+   ========================================================================== */
+.blob-wrapper {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-links a {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted-stone);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: var(--dark-stone);
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(110px);
+  opacity: 0.55;
+  animation: floatBlobs 6s ease-in-out infinite alternate;
+}
+
+.blob-peach {
+  width: 500px;
+  height: 500px;
+  background: #FFE4E1;
+  top: -120px;
+  right: 10%;
+  animation-delay: 0s;
+}
+
+.blob-lavender {
+  width: 520px;
+  height: 520px;
+  background: #E6E6FA;
+  bottom: -140px;
+  left: 8%;
+  animation-delay: -3s;
+}
+
+.blob-sage {
+  width: 360px;
+  height: 360px;
+  background: #E8EFE8;
+  top: 45%;
+  left: 15%;
+  animation-delay: -1.5s;
+}
+
+@keyframes floatBlobs {
+  0%   { transform: translateY(-12px) scale(1); }
+  100% { transform: translateY(12px) scale(1.04); }
+}
+
+/* ==========================================================================
+   ABOUT SECTION LAYOUT
+   ========================================================================== */
+.about-wrapper {
+  position: relative;
+  z-index: 10;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 80px 24px 80px;
+  box-sizing: border-box;
+}
+
+/* Hero Header */
+.about-hero {
+  text-align: center;
+  max-width: 780px;
+  margin: 0 auto 64px;
+}
+
+.manifesto-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--sage);
+  color: var(--sage-dark);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  margin-bottom: 20px;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4D7C0F;
+}
+
+.about-hero h1 {
+  margin: 0 0 16px;
+  font-size: 3.2rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--dark-stone);
+}
+
+.cursive-accent {
+  font-family: 'Reenie Beanie', cursive;
+  font-size: 4rem;
+  font-weight: 400;
+  color: #D97706;
+  line-height: 0.8;
+  display: inline-block;
+  margin: 0 6px;
+  transform: rotate(-2deg);
+}
+
+.about-hero p {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--muted-stone);
+  line-height: 1.6;
+}
+
+/* ==========================================================================
+   MANIFESTO CARD (LIVING ROOM SANCTUARY)
+   ========================================================================== */
+.manifesto-card {
+  background: var(--white);
+  border-radius: 2.5rem;
+  padding: 48px 44px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(231, 229, 228, 0.7);
+  margin-bottom: 56px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 36px;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.manifesto-left h3 {
+  margin: 0 0 14px;
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--dark-stone);
+}
+
+.manifesto-left p {
+  margin: 0 0 14px;
+  font-size: 15px;
+  color: var(--muted-stone);
+  line-height: 1.65;
+}
+
+.manifesto-left p:last-child {
+  margin-bottom: 0;
+}
+
+/* Note Card with Organic Tilt */
+.note-card {
+  background: var(--lavender);
+  border-radius: 2rem;
+  padding: 32px 28px;
+  box-shadow: var(--shadow-soft);
+  transform: rotate(1.4deg);
+  transition: transform 0.3s ease;
+}
+
+.note-card:hover {
+  transform: rotate(0deg);
+}
+
+.note-header {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted-stone);
+  margin-bottom: 12px;
+}
+
+.note-body {
+  margin: 0 0 22px;
+  font-size: 17px;
+  color: var(--dark-stone);
+  line-height: 1.5;
+}
+
+.note-signature {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.signature-line {
+  width: 32px;
+  height: 1px;
+  background: rgba(41, 37, 36, 0.2);
+}
+
+.signature-text {
+  font-family: 'Reenie Beanie', cursive;
+  font-size: 26px;
+  color: var(--dark-stone);
+  line-height: 1;
+}
+
+/* ==========================================================================
+   THREE PILLARS SECTION
+   ========================================================================== */
+.pillars-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.pillars-header h2 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--dark-stone);
+}
+
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 64px;
+}
+
+.pillar-card {
+  background: var(--white);
+  border-radius: 2rem;
+  padding: 34px 28px;
+  border: 1px solid rgba(231, 229, 228, 0.7);
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pillar-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px -6px rgba(0, 0, 0, 0.08);
+  border-color: var(--coral);
+}
+
+.pillar-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+.pillar-1 .pillar-icon { background: var(--sage); color: var(--sage-dark); }
+.pillar-2 .pillar-icon { background: #FFE4E1; color: #BE123C; }
+.pillar-3 .pillar-icon { background: var(--lavender); color: #6D28D9; }
+
+.pillar-card h3 {
+  margin: 0 0 10px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--dark-stone);
+  letter-spacing: -0.01em;
+}
+
+.pillar-card p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted-stone);
+  line-height: 1.6;
+}
+
+.pillar-tag {
+  margin-top: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--dark-stone);
+  display: inline-block;
+  border-top: 1px solid rgba(231, 229, 228, 0.6);
+  padding-top: 14px;
+}
+
+/* ==========================================================================
+   SERENE METRICS BANNER
+   ========================================================================== */
+.metrics-card {
+  background: #FBFBFA;
+  border: 1px solid var(--border-stone);
+  border-radius: 2.25rem;
+  padding: 36px 40px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  text-align: center;
+  margin-bottom: 64px;
+  box-sizing: border-box;
+}
+
+.metric-item h4 {
+  margin: 0 0 4px;
+  font-size: 2.3rem;
+  font-weight: 800;
+  color: var(--dark-stone);
+  letter-spacing: -0.03em;
+}
+
+.metric-item p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted-stone);
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   BOTTOM CTA CARD
+   ========================================================================== */
+.about-cta-card {
+  background: var(--white);
+  border-radius: 2.5rem;
+  padding: 48px;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+  border: 1px solid rgba(231, 229, 228, 0.7);
+  box-sizing: border-box;
+}
+
+.about-cta-card h2 {
+  margin: 0 0 10px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--dark-stone);
+}
+
+.about-cta-card p {
+  margin: 0 auto 28px;
+  font-size: 15px;
+  color: var(--muted-stone);
+  max-width: 520px;
+}
+
+.cta-button-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-pill-primary {
+  background: var(--coral);
+  color: var(--dark-stone);
+  padding: 14px 32px;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.3s ease;
+}
+
+.btn-pill-primary:hover {
+  background: var(--coral-hover);
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+.btn-pill-secondary {
+  background: transparent;
+  color: var(--dark-stone);
+  border: 1px solid var(--border-stone);
+  padding: 14px 28px;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.btn-pill-secondary:hover {
+  background: #FBFBFA;
+}
+
+/* ==========================================================================
+   RESPONSIVE QUERIES
+   ========================================================================== */
+@media (max-width: 860px) {
+  .about-hero h1 {
+    font-size: 2.4rem;
+  }
+  .cursive-accent {
+    font-size: 3.2rem;
+  }
+  .manifesto-card {
+    grid-template-columns: 1fr;
+    padding: 34px 24px;
+  }
+  .pillars-grid {
+    grid-template-columns: 1fr;
+  }
+  .metrics-card {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 28px;
+  }
+  .about-cta-card {
+    padding: 36px 20px;
+  }
+  .cta-button-group {
+    flex-direction: column;
+  }
+}
