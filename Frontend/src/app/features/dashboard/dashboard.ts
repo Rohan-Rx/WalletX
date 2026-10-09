@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { WalletService, Wallet } from '../../core/services/wallet.service';
 import { AuthService, User } from '../../core/services/auth.service';
 import { TransactionService, Transaction } from '../../core/services/transaction.service';
-import { RouterLink } from '@angular/router';
+import {Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { TransferForm } from '../transfer-form/transfer-form';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -16,7 +16,7 @@ import { PaymentService } from '../../core/services/payment.service';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, TransferForm, FormsModule],
+  imports: [CommonModule, TransferForm, FormsModule, RouterLink, RouterLinkActive],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
@@ -26,9 +26,10 @@ export class Dashboard implements OnInit {
   private transactionService = inject(TransactionService);
   private cdr = inject(ChangeDetectorRef);
   private paymentService = inject(PaymentService);
+  private router = inject(Router);
   showTransferForm = false;
   currentUser: User | null = null;
-  
+
   greeting = '';
   getGreeting(): string {
     const hour = new Date().getHours();
@@ -41,6 +42,10 @@ export class Dashboard implements OnInit {
       return 'Good evening';
     }
   }
+  logout(): void {
+  this.authService.logout();
+  this.router.navigate(['/login']);
+}
 
   wallet: Wallet | null = null;
   loading = true;
@@ -65,6 +70,107 @@ export class Dashboard implements OnInit {
   paymentStep: 'amount' | 'confirm' | 'processing' | 'success' = 'amount';
   paymentReference = '';
 
+  showMyWalletModal = false;
+
+  myWallet: Wallet | null = null;
+  myWalletTransactions: Transaction[] = [];
+
+  myWalletLoading = false;
+  myWalletTransactionsLoading = false;
+  myWalletError = '';
+
+  showTransactions = false;
+
+openTransactions(): void {
+  this.showTransactions = true;
+  this.loadWallet();
+}
+
+  openMyWallet(): void {
+    console.log('Before My Wallet:', {
+      url: window.location.href,
+      user: localStorage.getItem('loggedInUser')
+    });
+
+    this.showMyWalletModal = true;
+    this.loadMyWallet();
+
+    setTimeout(() => {
+      console.log('After My Wallet:', {
+        url: window.location.href,
+        user: localStorage.getItem('loggedInUser')
+      });
+    }, 1000);
+  }
+
+  closeMyWallet(): void {
+    this.showMyWalletModal = false;
+  }
+
+  loadMyWallet(): void {
+    const user = this.authService.getCurrentUser();
+
+    this.myWalletError = '';
+    this.myWallet = null;
+    this.myWalletTransactions = [];
+
+    if (!user) {
+      this.myWalletError = 'Please log in to view your wallet.';
+      return;
+    }
+
+    this.myWalletLoading = true;
+    console.log('Before wallet request:', this.authService.getCurrentUser());
+
+
+    this.walletService.getAllWallets().subscribe({
+      next: (wallets) => {
+        console.log('Wallets loaded:', wallets);
+
+        this.myWallet =
+          wallets.find(wallet => wallet.userid === user.userid) ?? null;
+
+        this.myWalletLoading = false;
+
+        if (!this.myWallet) {
+          this.myWalletError = 'No wallet was found for your account.';
+          return;
+        }
+
+        this.loadMyWalletTransactions(this.myWallet.walletId);
+      },
+      error: (error) => {
+        console.error('My Wallet request failed:', error);
+        console.log('User after failure:', this.authService.getCurrentUser());
+        console.error('Error loading wallet:', error);
+        this.myWalletLoading = false;
+        this.myWalletError = 'Unable to load your wallet. Please try again.';
+      }
+    });
+  }
+
+  loadMyWalletTransactions(walletId: string): void {
+    this.myWalletTransactionsLoading = true;
+
+    this.transactionService.getWalletHistory(walletId).subscribe({
+      next: (transactions) => {
+        this.myWalletTransactions = [...transactions]
+          .sort((a, b) =>
+            new Date(b.timestamp).getTime() -
+            new Date(a.timestamp).getTime()
+          )
+          .slice(0, 5);
+
+        this.myWalletTransactionsLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading wallet transactions:', error);
+        this.myWalletTransactions = [];
+        this.myWalletTransactionsLoading = false;
+      }
+    });
+  }
+
 
   openAddMoneyForm() {
     this.addMoneyAmount = null;
@@ -82,224 +188,245 @@ export class Dashboard implements OnInit {
   }
   addMoney() {
 
-  if (!this.wallet || !this.addMoneyAmount || this.addMoneyAmount <= 0) {
-    return;
+    if (!this.wallet || !this.addMoneyAmount || this.addMoneyAmount <= 0) {
+      return;
+    }
+
+    this.addingMoney = true;
+    this.paymentStep = 'processing';
+
+    const walletId = this.wallet.walletId;
+    const amount = this.addMoneyAmount;
+
+    this.transactionService
+      .topUp(walletId, amount)
+      .subscribe({
+
+        next: (transaction: Transaction) => {
+
+          console.log('Top-up successful:', transaction);
+
+          // Save payment reference
+          this.paymentReference = transaction.transactionId;
+
+          // Refresh wallet
+          this.walletService
+            .getWalletById(walletId)
+            .subscribe({
+
+              next: (updatedWallet: Wallet) => {
+
+                console.log('Updated wallet:', updatedWallet);
+
+                // Update dashboard wallet
+                this.wallet = updatedWallet;
+
+                // Refresh transaction history
+                this.loadTransactions(walletId);
+
+                // Stop processing
+                this.addingMoney = false;
+
+                // Show success screen
+                this.paymentStep = 'success';
+                this.cdr.detectChanges();
+              },
+
+              error: (err: HttpErrorResponse) => {
+
+                console.error('Wallet refresh failed:', err);
+
+                this.addingMoney = false;
+                this.paymentStep = 'confirm';
+
+                alert(
+                  'Payment was successful, but the wallet balance could not be refreshed.'
+                );
+              }
+            });
+        },
+
+        error: (err: HttpErrorResponse) => {
+
+          console.error('Top-up failed:', err);
+
+          this.addingMoney = false;
+          this.paymentStep = 'confirm';
+
+          if (err.status === 400) {
+            alert('Invalid payment amount.');
+          } else if (err.status === 404) {
+            alert('Wallet not found.');
+          } else if (err.status === 0) {
+            alert('Unable to connect to the payment service.');
+          } else {
+            alert('Payment failed. Please try again.');
+          }
+        }
+      });
   }
+  finishPayment() {
+    this.showAddMoneyForm = false;
+    this.paymentStep = 'amount';
+    this.addMoneyAmount = null;
+    this.paymentReference = '';
+  }
+  payWithRazorpay() {
 
-  this.addingMoney = true;
-  this.paymentStep = 'processing';
+    if (!this.wallet || !this.addMoneyAmount) {
+      alert('Wallet or amount is missing.');
+      return;
+    }
 
-  const walletId = this.wallet.walletId;
-  const amount = this.addMoneyAmount;
+    this.addingMoney = true;
+    this.paymentStep = 'processing';
 
-  this.transactionService
-    .topUp(walletId, amount)
-    .subscribe({
+    const walletId = this.wallet.walletId;
+    const amount = this.addMoneyAmount;
 
-      next: (transaction: Transaction) => {
+    this.paymentService.createOrder(walletId, amount).subscribe({
 
-        console.log('Top-up successful:', transaction);
+      next: (order) => {
 
-        // Save payment reference
-        this.paymentReference = transaction.transactionId;
+        console.log('Razorpay Order:', order);
 
-        // Refresh wallet
-        this.walletService
-          .getWalletById(walletId)
-          .subscribe({
+        const options = {
+          key: 'rzp_test_TkuWlwDklAOGiN',
 
-            next: (updatedWallet: Wallet) => {
+          amount: order.amount,
+          currency: order.currency,
 
-              console.log('Updated wallet:', updatedWallet);
+          name: 'WalletX',
+          description: 'Wallet Top-up',
 
-              // Update dashboard wallet
-              this.wallet = updatedWallet;
+          order_id: order.id,
 
-              // Refresh transaction history
-              this.loadTransactions(walletId);
+          handler: (response: any) => {
 
-              // Stop processing
-              this.addingMoney = false;
+            console.log('Razorpay Payment Response:', response);
 
-              // Show success screen
-              this.paymentStep = 'success';
-              this.cdr.detectChanges();
-            },
+            this.verifyRazorpayPayment(
+              walletId,
+              amount,
+              response
+            );
+          },
 
-            error: (err: HttpErrorResponse) => {
+          prefill: {
+            name: this.currentUser?.username || '',
+            email: this.currentUser?.email || ''
+          },
 
-              console.error('Wallet refresh failed:', err);
+          theme: {
+            color: '#3399cc'
+          },
 
+          modal: {
+            ondismiss: () => {
               this.addingMoney = false;
               this.paymentStep = 'confirm';
-
-              alert(
-                'Payment was successful, but the wallet balance could not be refreshed.'
-              );
             }
-          });
+          }
+        };
+
+        const razorpay = new Razorpay(options);
+
+        razorpay.open();
       },
 
-      error: (err: HttpErrorResponse) => {
+      error: (error) => {
 
-        console.error('Top-up failed:', err);
+        console.error('Order creation failed:', error);
 
         this.addingMoney = false;
         this.paymentStep = 'confirm';
 
-        if (err.status === 400) {
-          alert('Invalid payment amount.');
-        } else if (err.status === 404) {
-          alert('Wallet not found.');
-        } else if (err.status === 0) {
-          alert('Unable to connect to the payment service.');
-        } else {
-          alert('Payment failed. Please try again.');
-        }
+        alert('Unable to create payment order.');
       }
     });
-}
-  finishPayment() {
-  this.showAddMoneyForm = false;
-  this.paymentStep = 'amount';
-  this.addMoneyAmount = null;
-  this.paymentReference = '';
-}
-payWithRazorpay() {
-
-  if (!this.wallet || !this.addMoneyAmount) {
-    alert('Wallet or amount is missing.');
-    return;
   }
+  verifyRazorpayPayment(
+    walletId: string,
+    amount: number,
+    response: any
+  ) {
 
-  this.addingMoney = true;
-  this.paymentStep = 'processing';
+    const verificationData = {
+      razorpayOrderId: response.razorpay_order_id,
+      razorpayPaymentId: response.razorpay_payment_id,
+      razorpaySignature: response.razorpay_signature
+    };
 
-  const walletId = this.wallet.walletId;
-  const amount = this.addMoneyAmount;
+    console.log('Verification Data:', verificationData);
 
-  this.paymentService.createOrder(walletId, amount).subscribe({
+    this.paymentService.verifyPayment(
+      verificationData
+    ).subscribe({
 
-    next: (order) => {
+      next: (result) => {
+        console.log('Payment verification successful:', result);
 
-      console.log('Razorpay Order:', order);
+        this.paymentReference =
+          response.razorpay_payment_id;
 
-      const options = {
-        key: 'rzp_test_TkuWlwDklAOGiN',
+        this.addingMoney = false;
+        this.paymentStep = 'success';
 
-        amount: order.amount,
-        currency: order.currency,
+        this.walletService
+          .getWalletById(walletId)
+          .subscribe(updatedWallet => {
+            this.wallet = updatedWallet;
+            this.loadTransactions(walletId);
+          });
+      },
 
-        name: 'WalletX',
-        description: 'Wallet Top-up',
+      error: (error) => {
+        console.error('Payment verification failed:', error);
+        console.error('Backend response:', error.error);
 
-        order_id: order.id,
+        this.addingMoney = false;
+        this.paymentStep = 'confirm';
 
-        handler: (response: any) => {
-
-          console.log('Razorpay Payment Response:', response);
-
-          this.verifyRazorpayPayment(
-            walletId,
-            amount,
-            response
-          );
-        },
-
-        prefill: {
-          name: this.currentUser?.username || '',
-          email: this.currentUser?.email || ''
-        },
-
-        theme: {
-          color: '#3399cc'
-        },
-
-        modal: {
-          ondismiss: () => {
-            this.addingMoney = false;
-            this.paymentStep = 'confirm';
-          }
-        }
-      };
-
-      const razorpay = new Razorpay(options);
-
-      razorpay.open();
-    },
-
-    error: (error) => {
-
-      console.error('Order creation failed:', error);
-
-      this.addingMoney = false;
-      this.paymentStep = 'confirm';
-
-      alert('Unable to create payment order.');
-    }
-  });
-}
-verifyRazorpayPayment(
-  walletId: string,
-  amount: number,
-  response: any
-) {
-
-  const verificationData = {
-    walletId: walletId,
-    amount: amount,
-    razorpayOrderId: response.razorpay_order_id,
-    razorpayPaymentId: response.razorpay_payment_id,
-    razorpaySignature: response.razorpay_signature
-  };
-
-  console.log('Verification Data:', verificationData);
-
-  this.paymentService.verifyPayment(
-    verificationData
-  ).subscribe({
-
-    next: (result) => {
-      console.log('Payment verification successful:', result);
-
-      this.paymentReference =
-        response.razorpay_payment_id;
-
-      this.addingMoney = false;
-      this.paymentStep = 'success';
-
-      this.walletService
-        .getWalletById(walletId)
-        .subscribe(updatedWallet => {
-          this.wallet = updatedWallet;
-          this.loadTransactions(walletId);
-        });
-    },
-
-    error: (error) => {
-      console.error('Payment verification failed:', error);
-      console.error('Backend response:', error.error);
-
-      this.addingMoney = false;
-      this.paymentStep = 'confirm';
-
-      alert('Payment verification failed.');
-    }
-  });
-}
+        alert('Payment verification failed.');
+      }
+    });
+  }
 
   closeAddMoneyForm() {
     if (!this.addingMoney) {
       this.showAddMoneyForm = false;
     }
   }
+  private walletUpdatedHandler = () => {
+    const user = this.authService.getCurrentUser();
+
+    if (!user) return;
+
+    this.walletService.getAllWallets().subscribe({
+      next: (wallets) => {
+        this.wallet = wallets.find(
+          wallet => wallet.userid === user.userid
+        ) ?? null;
+
+        if (this.wallet) {
+          this.loadTransactions(this.wallet.walletId);
+        }
+      },
+      error: (err) => {
+        console.error('Failed to refresh wallet:', err);
+      }
+    });
+  };
 
 
 
   ngOnInit() {
     const user = this.authService.getCurrentUser();
     this.greeting = this.getGreeting();
-
+    window.addEventListener(
+      'wallet-updated',
+      this.walletUpdatedHandler
+    );
     console.log('Logged-in user:', user);
 
     if (!user) {
@@ -315,6 +442,7 @@ verifyRazorpayPayment(
     console.log('Dashboard user ID:', this.userId);
 
     this.loadWallet();
+
   }
   loadTransactions(walletId: string) {
     this.transactionService.getWalletHistory(walletId).subscribe({

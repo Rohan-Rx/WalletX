@@ -1,0 +1,205 @@
+<div class="transaction-controls">
+
+  <div class="search-box">
+    <input
+      type="text"
+      placeholder="Search transactions..."
+      [(ngModel)]="searchText"
+      (input)="onSearch()"
+    />
+  </div>
+
+  <div class="filter-buttons">
+    <button
+      type="button"
+      [class.active]="selectedFilter === 'ALL'"
+      (click)="filterTransactions('ALL')"
+    >
+      All
+    </button>
+
+    <button
+      type="button"
+      [class.active]="selectedFilter === 'CREDIT'"
+      (click)="filterTransactions('CREDIT')"
+    >
+      Credit
+    </button>
+
+    <button
+      type="button"
+      [class.active]="selectedFilter === 'DEBIT'"
+      (click)="filterTransactions('DEBIT')"
+    >
+      Debit
+    </button>
+  </div>
+
+</div>
+<!-- Transaction List -->
+<div
+  class="transaction-list"
+  *ngIf="!loading && filteredTransactions.length > 0"
+>
+  <div
+    class="transaction-card"
+    *ngFor="let transaction of filteredTransactions"
+    (click)="openTransaction(transaction)"
+  >
+
+    <!-- Transaction Icon -->
+    <div
+      class="transaction-icon"
+      [class.credit]="isCredit(transaction)"
+      [class.debit]="!isCredit(transaction)"
+    >
+      {{ isCredit(transaction) ? '↓' : '↑' }}
+    </div>
+
+    <!-- Transaction Details -->
+    <div class="transaction-info">
+
+      <h3>
+        {{ isCredit(transaction) ? 'Money Received' : 'Money Sent' }}
+      </h3>
+
+      <p>
+        {{ transaction.description }}
+      </p>
+
+      <small>
+        {{ transaction.timestamp | date:'dd MMM yyyy, hh:mm a' }}
+      </small>
+
+    </div>
+
+    <!-- Amount -->
+    <div class="transaction-amount">
+
+      <strong
+        [class.credit-text]="isCredit(transaction)"
+        [class.debit-text]="!isCredit(transaction)"
+      >
+        {{ isCredit(transaction) ? '+' : '-' }}₹{{ transaction.amount }}
+      </strong>
+
+      <span class="status">
+        {{ transaction.status }}
+      </span>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- No Transactions -->
+<div
+  class="empty-state"
+  *ngIf="!loading && filteredTransactions.length === 0"
+>
+  <h3>No transactions found</h3>
+  <p>Your wallet transactions will appear here.</p>
+</div>
+
+<!-- Loading -->
+<div class="loading" *ngIf="loading">
+  Loading transactions...
+</div>
+<!-- Transaction Details Modal -->
+<div
+  class="transaction-modal-overlay"
+  *ngIf="selectedTransaction"
+  (click)="closeTransaction()"
+>
+  <div
+    class="transaction-modal"
+    (click)="$event.stopPropagation()"
+  >
+
+    <!-- Close Button -->
+    <button
+      type="button"
+      class="close-btn"
+      (click)="closeTransaction()"
+    >
+      ×
+    </button>
+
+    <!-- Header -->
+    <div class="modal-header">
+
+      <div
+        class="transaction-icon"
+        [class.credit]="isCredit(selectedTransaction)"
+        [class.debit]="!isCredit(selectedTransaction)"
+      >
+        {{ isCredit(selectedTransaction) ? '↓' : '↑' }}
+      </div>
+
+      <div>
+        <h2>
+          {{ isCredit(selectedTransaction)
+            ? 'Money Received'
+            : 'Money Sent' }}
+        </h2>
+
+        <span class="status">
+          {{ selectedTransaction.status }}
+        </span>
+      </div>
+
+    </div>
+
+    <!-- Amount -->
+    <div class="modal-amount">
+      <strong
+        [class.credit-text]="isCredit(selectedTransaction)"
+        [class.debit-text]="!isCredit(selectedTransaction)"
+      >
+        {{ isCredit(selectedTransaction) ? '+' : '-' }}
+        ₹{{ selectedTransaction.amount }}
+      </strong>
+    </div>
+
+    <!-- Details -->
+    <div class="transaction-details">
+
+      <div class="detail-row">
+        <span>Transaction ID</span>
+        <strong>
+          {{ selectedTransaction.transactionId }}
+        </strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Wallet ID</span>
+        <strong>
+          {{ selectedTransaction.walletId }}
+        </strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Type</span>
+        <strong>
+          {{ selectedTransaction.type }}
+        </strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Description</span>
+        <strong>
+          {{ selectedTransaction.description }}
+        </strong>
+      </div>
+
+      <div class="detail-row">
+        <span>Date & Time</span>
+        <strong>
+          {{ selectedTransaction.timestamp | date:'dd MMM yyyy, hh:mm a' }}
+        </strong>
+      </div>
+
+    </div>
+
+  </div>
+</div>

@@ -180,6 +180,100 @@
   color: #64756b;
 }
 /* ==========================================================================
+   My WALLET
+   ========================================================================== */
+   .my-wallet-modal {
+  position: relative;
+  width: min(560px, 94vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 28px;
+  background: #ffffff;
+  color: #172033;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.my-wallet-modal h2 {
+  margin: 0 0 22px;
+  font-size: 24px;
+}
+
+.wallet-balance-card {
+  padding: 22px;
+  margin-bottom: 20px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #172554, #2563eb);
+  border-radius: 14px;
+}
+
+.wallet-balance-card p {
+  margin: 0 0 10px;
+  opacity: 0.85;
+}
+
+.wallet-balance-card h3 {
+  margin: 0;
+  font-size: 30px;
+  overflow-wrap: anywhere;
+}
+
+.wallet-details {
+  padding: 4px 0 16px;
+}
+
+.wallet-details p {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  margin: 0;
+  border-bottom: 1px solid #e5e7eb;
+  overflow-wrap: anywhere;
+}
+
+.wallet-transactions {
+  margin-top: 20px;
+}
+
+.wallet-transactions h3 {
+  margin-bottom: 14px;
+  font-size: 18px;
+}
+
+.wallet-transaction-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.wallet-transaction-row p {
+  margin: 5px 0;
+  color: #64748b;
+  overflow-wrap: anywhere;
+}
+
+.wallet-transaction-row small {
+  color: #64748b;
+}
+
+.error-message {
+  color: #dc2626;
+}
+
+@media (max-width: 480px) {
+  .my-wallet-modal {
+    padding: 20px;
+  }
+
+  .wallet-balance-card h3 {
+    font-size: 25px;
+  }
+}
+/* ==========================================================================
    TACTILE FLOATING SIDEBAR
    ========================================================================== */
 .sidebar {

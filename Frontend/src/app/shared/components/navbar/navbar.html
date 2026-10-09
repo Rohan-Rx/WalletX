@@ -1,1 +1,182 @@
-<p>navbar works!</p>
+<header class="segmented-island-navbar">
+
+  <!-- LEFT -->
+  <div class="island-left">
+
+    <label for="nav-toggle" class="menu-toggle" title="Toggle navigation">
+      <svg viewBox="0 0 24 24"
+           width="20"
+           height="20"
+           fill="none"
+           stroke="currentColor"
+           stroke-width="1.8"
+           stroke-linecap="round">
+        <path d="M4 7h16M4 12h10M4 17h16" />
+      </svg>
+    </label>
+
+    <div class="brand-breadcrumb">
+
+      <div class="mini-logo-dot">
+        W
+      </div>
+
+      <span class="breadcrumb-brand">
+        WalletX
+      </span>
+
+      <span class="breadcrumb-separator">
+        /
+      </span>
+
+      <span class="breadcrumb-page">
+        {{ currentPage }}
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- CENTER -->
+  <nav class="segmented-tabs-wrapper"
+       aria-label="WalletX navigation">
+
+    <button
+      class="tab-pill"
+      type="button"
+      routerLink="/dashboard"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }">
+
+      <span
+        class="tab-active-dot"
+        *ngIf="currentPage === 'Dashboard'">
+        ●
+      </span>
+
+      <span>
+        Overview
+      </span>
+
+    </button>
+
+
+    <button
+      class="tab-pill"
+      type="button"
+      routerLink="/wallet"
+      routerLinkActive="active">
+
+      <span>
+        My Wallet
+      </span>
+
+    </button>
+
+
+    <button
+      class="tab-pill"
+      type="button"
+      routerLink="/transfer"
+      routerLinkActive="active">
+
+      <span>
+        Send Money
+      </span>
+
+    </button>
+
+
+    <button
+      class="tab-pill"
+      type="button"
+      routerLink="/transaction"
+      routerLinkActive="active">
+
+      <span>
+        Transactions
+      </span>
+
+    </button>
+
+  </nav>
+
+
+  <!-- RIGHT -->
+  <div class="island-right">
+
+    @if (wallet) {
+
+      <div
+        class="sage-balance-pill"
+        title="Available Balance">
+
+        <span class="sage-pulse-dot"></span>
+
+        <span>
+          {{ wallet.balance | currency:'INR':'symbol':'1.0-0':'en-IN' }}
+        </span>
+
+      </div>
+
+    }
+
+
+    <button
+      class="nav-icon-btn"
+      type="button"
+      aria-label="Notifications">
+
+      <svg
+        viewBox="0 0 24 24"
+        width="18"
+        height="18"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round">
+
+        <path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z" />
+
+        <path d="M10 20a2 2 0 0 0 4 0" />
+
+      </svg>
+
+      <span class="notif-dot"></span>
+
+    </button>
+
+
+    <div class="profile-pill">
+
+      <div class="avatar-circle">
+
+        {{ currentUser?.username?.charAt(0)?.toUpperCase() || 'R' }}
+
+        <span class="online-dot"></span>
+
+      </div>
+
+      <div class="profile-text">
+
+        <span class="profile-name">
+          {{ currentUser?.username || 'Rohan' }}
+        </span>
+
+        <span class="verified-tag">
+          ✓
+        </span>
+
+      </div>
+
+      <span class="profile-chevron">
+        ▾
+      </span>
+
+    </div>
+
+  </div>
+
+</header>

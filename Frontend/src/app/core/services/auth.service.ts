@@ -54,6 +54,7 @@ export class AuthService {
   }
 
   logout() {
+    console.trace('AuthService.logout() called');
     localStorage.removeItem('loggedInUser');
   }
 }

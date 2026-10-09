@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { TransferRequest } from './transaction.service';
 
 export interface PaymentOrder {
   id: string;
@@ -40,4 +41,26 @@ export class PaymentService {
       data
     );
   }
+  
+createTransferOrder(request: {
+  senderWalletId: string;
+  receiverWalletId: string;
+  amount: number;
+}): Observable<PaymentOrder> {
+  return this.http.post<PaymentOrder>(
+    `${this.baseUrl}/create-transfer-order`,
+    request
+  );
+}
+
+verifyTransfer(data: {
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+}): Observable<any> {
+  return this.http.post(
+    `${this.baseUrl}/verify-transfer`,
+    data
+  );
+}
 }

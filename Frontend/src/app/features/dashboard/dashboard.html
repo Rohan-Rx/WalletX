@@ -227,7 +227,7 @@
       </a>
 
       <!-- My Wallet -->
-      <a href="#" class="menu-item" data-label="My Wallet">
+      <a href="#" class="menu-item" data-label="My Wallet" (click)="$event.preventDefault(); openMyWallet()">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
           stroke-linecap="round" stroke-linejoin="round">
           <path d="M4 8.5C4 7.1 5.1 6 6.5 6H18a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6.5A2.5 2.5 0 0 1 4 16.5v-8Z" />
@@ -235,6 +235,75 @@
         </svg>
         <span class="label">My Wallet</span>
       </a>
+      <!-- My Wallet modal -->
+      @if (showMyWalletModal) {
+      <div class="modal-backdrop" (click)="closeMyWallet()">
+        <div class="my-wallet-modal" (click)="$event.stopPropagation()">
+          <button type="button" class="modal-close" (click)="closeMyWallet()" aria-label="Close My Wallet">
+            &times;
+          </button>
+
+          <h2>My Wallet</h2>
+
+          @if (myWalletLoading) {
+          <p>Loading wallet details...</p>
+          } @else if (myWalletError) {
+          <p class="error-message">{{ myWalletError }}</p>
+          } @else if (myWallet) {
+          <section class="wallet-balance-card">
+            <p>Available Balance</p>
+            <h3>
+              {{ myWallet.currency || 'INR' }}
+              {{ myWallet.balance | number:'1.2-2' }}
+            </h3>
+          </section>
+
+          <section class="wallet-details">
+            <p>
+              <strong>Wallet ID:</strong>
+              {{ myWallet.walletId }}
+            </p>
+            <p>
+              <strong>Status:</strong>
+              {{ myWallet.status }}
+            </p>
+            <p>
+              <strong>Currency:</strong>
+              {{ myWallet.currency || 'INR' }}
+            </p>
+          </section>
+
+          <section class="wallet-transactions">
+            <h3>Recent Transactions</h3>
+
+            @if (myWalletTransactionsLoading) {
+            <p>Loading transactions...</p>
+            } @else if (myWalletTransactions.length === 0) {
+            <p>No transactions found.</p>
+            } @else {
+            @for (
+            transaction of myWalletTransactions;
+            track transaction.id
+            ) {
+            <div class="wallet-transaction-row">
+              <div>
+                <strong>{{ transaction.type }}</strong>
+                <p>{{ transaction.description || 'Wallet transaction' }}</p>
+                <small>
+                  {{ transaction.timestamp | date:'medium' }}
+                </small>
+              </div>
+              <strong>
+                {{ transaction.amount | number:'1.2-2' }}
+              </strong>
+            </div>
+            }
+            }
+          </section>
+          }
+        </div>
+      </div>
+      }
 
       <!-- Send Money -->
       <a href="javascript:void(0)" class="menu-item" (click)="showTransferForm = true" data-label="Send Money">
@@ -258,7 +327,7 @@
       </button>
 
       <!-- Transactions -->
-      <a href="#" class="menu-item" data-label="Transactions">
+      <a href="#" class="menu-item" data-label="Transactions" (click)="$event.preventDefault(); openTransactions()">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
           stroke-linecap="round" stroke-linejoin="round">
           <path d="M7 4h10a2 2 0 0 1 2 2v14l-3-2-2 2-2-2-2 2-2-2-3 2V6a2 2 0 0 1 2-2Z" />
@@ -266,6 +335,34 @@
         </svg>
         <span class="label">Transactions</span>
       </a>
+      @if (showTransactions) {
+      <div class="modal-backdrop" (click)="showTransactions = false">
+        <div class="my-wallet-modal" (click)="$event.stopPropagation()">
+          <button type="button" class="modal-close" (click)="showTransactions = false" aria-label="Close Transactions">
+            &times;
+          </button>
+
+          <h2>Transaction History</h2>
+
+          @if (loading) {
+          <p>Loading transactions...</p>
+          } @else if (transactions.length === 0) {
+          <p>No transactions found.</p>
+          } @else {
+          @for (transaction of transactions; track transaction.id) {
+          <div class="wallet-transaction-row">
+            <div>
+              <strong>{{ transaction.type }}</strong>
+              <p>{{ transaction.description || 'Wallet transaction' }}</p>
+              <small>{{ transaction.timestamp | date:'medium' }}</small>
+            </div>
+            <strong>{{ transaction.amount | number:'1.2-2' }}</strong>
+          </div>
+          }
+          }
+        </div>
+      </div>
+      }
 
     </nav>
 
@@ -282,7 +379,9 @@
         <span class="label">Settings</span>
       </a>
 
-      <a href="#" class="menu-item logout" data-label="Logout">
+
+
+      <button type="button" class="menu-item logout" data-label="Logout" (click)="logout()">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
           stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -290,7 +389,9 @@
           <path d="M21 12H9" />
         </svg>
         <span class="label">Logout</span>
-      </a>
+      </button>
+
+
 
     </div>
 
@@ -307,8 +408,9 @@
     <!-- =================================================== -->
     <header class="segmented-island-navbar">
 
-      <!-- Left: Mobile Toggle & Brand Breadcrumb -->
+      <!-- LEFT -->
       <div class="island-left">
+
         <label for="nav-toggle" class="menu-toggle" title="Toggle navigation">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"
             stroke-linecap="round">
@@ -317,66 +419,130 @@
         </label>
 
         <div class="brand-breadcrumb">
-          <div class="mini-logo-dot">W</div>
-          <span class="breadcrumb-brand">WalletX</span>
-          <span class="breadcrumb-separator">/</span>
-          <span class="breadcrumb-page">Dashboard</span>
+
+          <div class="mini-logo-dot">
+            W
+          </div>
+
+          <span class="breadcrumb-brand">
+            WalletX
+          </span>
+
+          <span class="breadcrumb-separator">
+            /
+          </span>
+
+          <span class="breadcrumb-page">
+            Dashboard
+          </span>
+
         </div>
+
       </div>
 
-      <!-- Center: Linear-Style Segmented Pill Tabs -->
-      <nav class="segmented-tabs-wrapper" aria-label="Dashboard views">
-        <button class="tab-pill active" type="button">
-          <span class="tab-active-dot">●</span>
-          <span>Overview</span>
+
+      <!-- CENTER -->
+      <nav class="segmented-tabs-wrapper" aria-label="WalletX navigation">
+
+        <button class="tab-pill" type="button" routerLink="/dashboard" routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }">
+
+          <span class="tab-active-dot">
+            ●
+          </span>
+
+          <span>
+            Overview
+          </span>
+
         </button>
 
-        <button class="tab-pill" type="button">
-          <span>My Wallet</span>
+
+        <button class="tab-pill" type="button" (click)="$event.preventDefault(); openMyWallet()">
+
+          <span>
+            My Wallet
+          </span>
+
         </button>
+
 
         <button class="tab-pill" type="button" (click)="showTransferForm = true">
-          <span>Send Money</span>
+          Send Money
         </button>
 
-        <button class="tab-pill" type="button">
-          <span>Transactions</span>
+
+        <button class="tab-pill" type="button" routerLink="/transaction" routerLinkActive="active">
+
+          <span>
+            Transactions
+          </span>
+
         </button>
+
       </nav>
 
-      <!-- Right: Sage Balance Peek, Notifications & Profile -->
+
+      <!-- RIGHT -->
       <div class="island-right">
 
         @if (wallet) {
+
         <div class="sage-balance-pill" title="Available Balance">
+
           <span class="sage-pulse-dot"></span>
+
           <span>
             {{ wallet.balance | currency:'INR':'symbol':'1.0-0':'en-IN' }}
           </span>
+
         </div>
+
         }
 
+
         <button class="nav-icon-btn" type="button" aria-label="Notifications">
+
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8"
             stroke-linecap="round" stroke-linejoin="round">
+
             <path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9Z" />
+
             <path d="M10 20a2 2 0 0 0 4 0" />
+
           </svg>
+
           <span class="notif-dot"></span>
+
         </button>
 
+
         <div class="profile-pill">
+
           <div class="avatar-circle">
-            R
+
+            {{ currentUser?.username?.charAt(0)?.toUpperCase() || 'R' }}
+
             <span class="online-dot"></span>
+
           </div>
+
           <div class="profile-text">
+
             <span class="profile-name">
               {{ currentUser?.username || 'Rohan' }}
             </span>
-            <span class="verified-tag">✓</span>
+
+            <span class="verified-tag">
+              ✓
+            </span>
+
           </div>
-          <span class="profile-chevron">▾</span>
+
+          <span class="profile-chevron">
+            ▾
+          </span>
+
         </div>
 
       </div>
@@ -492,7 +658,7 @@
       <div class="quick-actions">
 
         <!-- Add Money -->
-        <button class="action-card" type="button">
+        <button class="action-card" type="button" (click)="openAddMoneyForm()">
           <div class="action-icon">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round">
@@ -521,7 +687,7 @@
         </button>
 
         <!-- Transactions -->
-        <button class="action-card" type="button">
+        <button class="action-card" type="button" routerLink="/transaction" routerLinkActive="active">
           <div class="action-icon">
             <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9"
               stroke-linecap="round">

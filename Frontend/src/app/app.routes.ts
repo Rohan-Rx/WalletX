@@ -4,12 +4,13 @@ import { Login } from './features/auth/login/login';
 import { Dashboard } from './features/dashboard/dashboard';
 import { TransferForm } from './features/transfer-form/transfer-form';
 import { About } from './features/about/about';
+import { TransactionComponent } from './features/transaction/transaction';
 
 export const routes: Routes = [
   { path: 'register', component: Register },
   { path: 'login', component: Login },
   { path: 'dashboard', component: Dashboard },
-
+  {path:'transaction',component: TransactionComponent},
  { 
   path: 'transfer', 
   component: TransferForm 
